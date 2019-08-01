@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Michał Białecki</Authors>
+    <Company>Egnyte Inc.</Company>
+    <Description>Egnyte Api client for .net core</Description>
   </PropertyGroup>
 
   <ItemGroup>
