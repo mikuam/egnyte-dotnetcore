@@ -6,15 +6,13 @@ A .NET SDK for integration with Egnyte API.
 
 To get started working with Egnyte .NET SDK, we recommend you to add it to your project using NuGet.
 
-To install `Egnyte.Api`, run the following command in the Package Manager Console:
+To install `Egnyte.Core.Api`, run the following command in the Package Manager Console:
 
-```PM> Install-Package Egnyte.Api```
+```PM> Install-Package Egnyte.Core.Api```
 
 ## Supported frameworks
 
-* .Net Framework 4.5
-* Windows Phone 8.1
-* Xamarin
+* .Net Standard 2.0
 
 ## Creating an application
 
@@ -26,7 +24,7 @@ You need to create an account to have a domain and generate a key for your appli
 
 ### Obtaining an access token
 
-In Egnyte.Api all 3 authorization flows are implemented. However, Authorization Code Flow is the most common. To create authorize uri, use OAuthHelper class:
+In Egnyte.Core.Api all 3 authorization flows are implemented. However, Authorization Code Flow is the most common. To create authorize uri, use OAuthHelper class:
 ```csharp
 var authorizeUrl = OAuthHelper.GetAuthorizeUri(
     OAuthAuthorizationFlow.Code,
