@@ -10,6 +10,23 @@
     {
         readonly HttpClient httpClient;
 
+        /// <summary>
+        /// Insertion point for logging of requests to API.
+        /// Occurs just prior to sending the request.
+        /// </summary>
+        /// <value>Returns a unique value related to the request if needed in the After functions</value>
+        public static Func<HttpRequestMessage, object> BeforeRequest { get; set; }
+        /// <summary>
+        /// Insertion point for logging of requests to API. 
+        /// Occurs after the response is received before any handling of status or content.
+        /// </summary>
+        public static Action<object, HttpRequestMessage, HttpResponseMessage, string> AfterResponse { get; set; }
+        /// <summary>
+        /// Insertion point for logging of requests to API. 
+        /// Occurs after an exception due to status or content of the response.
+        /// </summary>
+        public static Action<object, HttpRequestMessage, Exception> AfterException { get; set; }
+
         public ServiceHandler(HttpClient httpClient)
         {
             this.httpClient = httpClient;
@@ -17,41 +34,65 @@
 
         public async Task<ServiceResponse<T>> SendRequestAsync(HttpRequestMessage request)
         {
-            request.RequestUri = ApplyAdditionalUrlMapping(request.RequestUri);
-            var response = await httpClient.SendAsync(request).ConfigureAwait(false);
-            var rawContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-            if (response.IsSuccessStatusCode)
+            object o = null;
+            try
             {
-                try
+                request.RequestUri = ApplyAdditionalUrlMapping(request.RequestUri);
+
+                if (BeforeRequest != null)
                 {
-                    if (typeof(T) == typeof(string))
+                    o = BeforeRequest.Invoke(request);
+                }
+
+                var response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                var rawContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                if (AfterResponse != null)
+                {
+                    AfterResponse.Invoke(o, request, response, rawContent);
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    try
                     {
+                        if (typeof(T) == typeof(string))
+                        {
+                            return new ServiceResponse<T>
+                            {
+                                Data = rawContent as T,
+                                Headers = response.GetResponseHeaders()
+                            };
+                        }
+
                         return new ServiceResponse<T>
                         {
-                            Data = rawContent as T,
+                            Data = JsonConvert.DeserializeObject<T>(rawContent),
                             Headers = response.GetResponseHeaders()
                         };
                     }
-
-                    return new ServiceResponse<T>
-                               {
-                                   Data = JsonConvert.DeserializeObject<T>(rawContent),
-                                   Headers = response.GetResponseHeaders()
-                    };
+                    catch (Exception e)
+                    {
+                        throw new EgnyteApiException(
+                            rawContent,
+                            response,
+                            e);
+                    }
                 }
-                catch (Exception e)
-                {
-                    throw new EgnyteApiException(
+
+                throw new EgnyteApiException(
                         rawContent,
-                        response,
-                        e);
-                }
+                        response);
             }
+            catch(Exception e)
+            {
+                if (AfterException != null)
+                {
+                    AfterException.Invoke(o, request, e);
+                }
 
-            throw new EgnyteApiException(
-                    rawContent,
-                    response);
+                throw;
+            }
         }
 
         public async Task<ServiceResponse<byte[]>> GetFileToDownload(HttpRequestMessage request)

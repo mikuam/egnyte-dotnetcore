@@ -11,6 +11,7 @@
     using Permissions;
     using Search;
     using Audit;
+    using Egnyte.API;
 
     public class EgnyteClient
     {
@@ -42,7 +43,15 @@
                 throw new ArgumentNullException("domain", "Domain or host has to specified");
             }
 
-            httpClient = httpClient ?? new HttpClient();
+            var handler = new RedirectionHandler()
+            {
+                InnerHandler = new HttpClientHandler()
+                {
+                    AllowAutoRedirect = false
+                }
+            };
+
+            httpClient = httpClient ?? new HttpClient(handler);
 
             httpClient.Timeout = TimeSpan.FromMinutes(10);
             if (requestTimeout.HasValue)
