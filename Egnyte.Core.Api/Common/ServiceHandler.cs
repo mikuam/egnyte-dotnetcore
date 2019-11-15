@@ -10,23 +10,6 @@
     {
         readonly HttpClient httpClient;
 
-        /// <summary>
-        /// Insertion point for logging of requests to API.
-        /// Occurs just prior to sending the request.
-        /// </summary>
-        /// <value>Returns a unique value related to the request if needed in the After functions</value>
-        public static Func<HttpRequestMessage, object> BeforeRequest { get; set; }
-        /// <summary>
-        /// Insertion point for logging of requests to API. 
-        /// Occurs after the response is received before any handling of status or content.
-        /// </summary>
-        public static Action<object, HttpRequestMessage, HttpResponseMessage, string> AfterResponse { get; set; }
-        /// <summary>
-        /// Insertion point for logging of requests to API. 
-        /// Occurs after an exception due to status or content of the response.
-        /// </summary>
-        public static Action<object, HttpRequestMessage, Exception> AfterException { get; set; }
-
         public ServiceHandler(HttpClient httpClient)
         {
             this.httpClient = httpClient;
@@ -39,17 +22,17 @@
             {
                 request.RequestUri = ApplyAdditionalUrlMapping(request.RequestUri);
 
-                if (BeforeRequest != null)
+                if (BaseClient.BeforeRequest != null)
                 {
-                    o = BeforeRequest.Invoke(request);
+                    o = BaseClient.BeforeRequest.Invoke(request);
                 }
 
                 var response = await httpClient.SendAsync(request).ConfigureAwait(false);
                 var rawContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                if (AfterResponse != null)
+                if (BaseClient.AfterResponse != null)
                 {
-                    AfterResponse.Invoke(o, request, response, rawContent);
+                    BaseClient.AfterResponse.Invoke(o, request, response, rawContent);
                 }
 
                 if (response.IsSuccessStatusCode)
@@ -86,9 +69,9 @@
             }
             catch(Exception e)
             {
-                if (AfterException != null)
+                if (BaseClient.AfterException != null)
                 {
-                    AfterException.Invoke(o, request, e);
+                    BaseClient.AfterException.Invoke(o, request, e);
                 }
 
                 throw;
