@@ -24,7 +24,7 @@
 
                 if (BaseClient.BeforeRequest != null)
                 {
-                    o = BaseClient.BeforeRequest.Invoke(request);
+                    o = BaseClient.BeforeRequest.Invoke(request, httpClient);
                 }
 
                 var response = await httpClient.SendAsync(request).ConfigureAwait(false);

@@ -20,7 +20,7 @@ namespace Egnyte.Api.Common
         /// Occurs just prior to sending the request.
         /// </summary>
         /// <value>Returns a unique value related to the request if needed in the After functions</value>
-        public static Func<HttpRequestMessage, object> BeforeRequest { get; set; }
+        public static Func<HttpRequestMessage, HttpClient, object> BeforeRequest { get; set; }
         /// <summary>
         /// Insertion point for logging of requests to API. 
         /// Occurs after the response is received before any handling of status or content.
