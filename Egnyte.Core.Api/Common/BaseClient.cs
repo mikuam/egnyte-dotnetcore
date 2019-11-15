@@ -25,7 +25,8 @@ namespace Egnyte.Api.Common
         /// Insertion point for logging of requests to API. 
         /// Occurs after the response is received before any handling of status or content.
         /// </summary>
-        public static Action<object, HttpRequestMessage, HttpResponseMessage, string> AfterResponse { get; set; }
+        /// <value>Returns the same value as BeforeRequest with any updates from response information</value>
+        public static Func<object, HttpRequestMessage, HttpResponseMessage, string, object> AfterResponse { get; set; }
         /// <summary>
         /// Insertion point for logging of requests to API. 
         /// Occurs after an exception due to status or content of the response.

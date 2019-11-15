@@ -32,7 +32,7 @@
 
                 if (BaseClient.AfterResponse != null)
                 {
-                    BaseClient.AfterResponse.Invoke(o, request, response, rawContent);
+                    o = BaseClient.AfterResponse.Invoke(o, request, response, rawContent);
                 }
 
                 if (response.IsSuccessStatusCode)
