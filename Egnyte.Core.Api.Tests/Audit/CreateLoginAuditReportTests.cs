@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Egnyte.Api.Tests.Search
+namespace Egnyte.Api.Tests.Audit
 {
     [TestFixture]
     public class CreateLoginAuditReportTests
@@ -50,14 +50,14 @@ namespace Egnyte.Api.Tests.Search
 
             var egnyteClient = new EgnyteClient("token", "acme", httpClient);
             var auditReportResult = await egnyteClient.Audit.CreateLoginAuditReport(
-                Audit.AuditReportFormat.Json,
+                Egnyte.Api.Audit.AuditReportFormat.Json,
                 new DateTime(2012, 05, 01),
                 new DateTime(2012, 05, 20),
                 new List<string> { "logins", "failed_attempts" },
-                new List<Audit.AuditReportAccessPoint>
+                new List<Egnyte.Api.Audit.AuditReportAccessPoint>
                 {
-                    Audit.AuditReportAccessPoint.Web,
-                    Audit.AuditReportAccessPoint.FTP
+                    Egnyte.Api.Audit.AuditReportAccessPoint.Web,
+                    Egnyte.Api.Audit.AuditReportAccessPoint.FTP
                 },
                 new List<string> { "jsmith", "kjohnson" });
 
@@ -67,7 +67,7 @@ namespace Egnyte.Api.Tests.Search
                 requestMessage.RequestUri.ToString());
 
             Assert.AreEqual(HttpMethod.Post, requestMessage.Method);
-            Assert.AreEqual("12345678", auditReportResult);
+            Assert.AreEqual("12345678", auditReportResult.Id);
 
             var requestContent = httpHandlerMock.GetRequestContentAsString();
             Assert.AreEqual(
@@ -83,7 +83,7 @@ namespace Egnyte.Api.Tests.Search
 
             var exception = await AssertExtensions.ThrowsAsync<ArgumentException>(
                             () => egnyteClient.Audit.CreateLoginAuditReport(
-                                Audit.AuditReportFormat.Json,
+                                Egnyte.Api.Audit.AuditReportFormat.Json,
                                 new DateTime(2012, 05, 01),
                                 new DateTime(2012, 05, 20),
                                 new List<string>()));
